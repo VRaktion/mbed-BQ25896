@@ -203,8 +203,8 @@ public:
         };
     };
 
-    BQ25896(const PinName sda, const PinName scl):
-        i2c(sda, scl),
+    BQ25896(I2C &i2c):
+        i2c(i2c),
         I2C_ADDR(BQ25896_I2C_ADDR << 1) {
     }
 
@@ -271,13 +271,19 @@ public:
 
     /*** REG02 ***/
 
-    uint8_t oneShotADC(){
+    uint8_t startADC(){
         uint8_t reg = readRegister(REGISTER::REG02::_ADDR);
         setBit(&reg, REGISTER::REG02::CONV_START);
         return setRegister(REGISTER::REG02::_ADDR, reg);
     }
 
-    uint8_t startADC(){
+    uint8_t oneShotADC(){
+        uint8_t reg = readRegister(REGISTER::REG02::_ADDR);
+        unsetBit(&reg, REGISTER::REG02::CONV_RATE);
+        return setRegister(REGISTER::REG02::_ADDR, reg);
+    }
+
+    uint8_t oneSecADC(){
         uint8_t reg = readRegister(REGISTER::REG02::_ADDR);
         setBit(&reg, REGISTER::REG02::CONV_RATE);
         return setRegister(REGISTER::REG02::_ADDR, reg);
@@ -661,7 +667,7 @@ public:
 
     protected:
     uint8_t I2C_ADDR;
-    I2C i2c;
+    I2C &i2c;
 };
 
 #endif /*__BQ25896_H__*/
